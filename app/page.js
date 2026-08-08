@@ -4,6 +4,7 @@ import { useState } from 'react';
 import AuthPanel from './components/AuthPanel';
 import StudentDashboard from './components/StudentDashboard';
 import TrainerDashboard from './components/TrainerDashboard';
+import MaterialReview from './components/MaterialReview';
 import ChatInterface from './components/ChatInterface';
 import QuizComponent from './components/QuizComponent';
 import UploadComponent from './components/UploadComponent';
@@ -16,6 +17,7 @@ export default function Home() {
   const role = currentUser?.profile?.role;
   const isStudent = role === 'Schüler';
   const isTrainer = role === 'Ausbilder' || role === 'Admin';
+  const isAdmin = role === 'Admin';
 
   return (
     <main style={{ maxWidth: 1000, margin: '0 auto', padding: 24 }}>
@@ -31,6 +33,7 @@ export default function Home() {
           <>
             {isStudent && <StudentDashboard user={currentUser} />}
             {isTrainer && <TrainerDashboard user={currentUser} />}
+            {isAdmin && <MaterialReview user={currentUser} />}
 
             {isStudent && (
               <>
