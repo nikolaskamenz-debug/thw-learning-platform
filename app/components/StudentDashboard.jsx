@@ -67,7 +67,8 @@ export default function StudentDashboard({ user }) {
   if (user?.profile?.role !== 'Schüler') return null;
 
   return (
-    <section>
+    <section className="abschnitt">
+      <div className="karte">
       <h2>Schüler-Dashboard</h2>
       <p>Willkommen, {user.profile?.name || user.email}.</p>
 
@@ -76,23 +77,23 @@ export default function StudentDashboard({ user }) {
 
       {!loading && !error && (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
-            <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
-              <strong>Lernfortschritt</strong>
-              <p style={{ fontSize: 28, margin: '8px 0' }}>{averageProgress}%</p>
-              <small>{completedChapters} Kapitel abgeschlossen</small>
+          <div className="kennzahlen">
+            <article className="kennzahl">
+              <span className="kennzahl__titel">Lernfortschritt</span>
+              <p className="kennzahl__wert">{averageProgress}%</p>
+              <span className="kennzahl__zusatz">{completedChapters} Kapitel abgeschlossen</span>
             </article>
 
-            <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
-              <strong>Quiz-Punkte</strong>
-              <p style={{ fontSize: 28, margin: '8px 0' }}>{totalPoints}</p>
-              <small>{correctAnswers} richtige Antworten</small>
+            <article className="kennzahl">
+              <span className="kennzahl__titel">Quiz-Punkte</span>
+              <p className="kennzahl__wert">{totalPoints}</p>
+              <span className="kennzahl__zusatz">{correctAnswers} richtige Antworten</span>
             </article>
 
-            <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}>
-              <strong>Nächstes Kapitel</strong>
+            <article className="kennzahl">
+              <span className="kennzahl__titel">Nächstes Kapitel</span>
               <p style={{ margin: '8px 0' }}>{nextChapter?.chapter || 'Noch nicht festgelegt'}</p>
-              <small>{nextChapter ? `${nextChapter.progress_percent || 0}% bearbeitet` : 'Starte dein erstes Kapitel.'}</small>
+              <span className="kennzahl__zusatz">{nextChapter ? `${nextChapter.progress_percent || 0}% bearbeitet` : 'Starte dein erstes Kapitel.'}</span>
             </article>
           </div>
 
@@ -105,7 +106,7 @@ export default function StudentDashboard({ user }) {
                     <span>{row.chapter || 'Kapitel ohne Titel'}</span>
                     <span>{row.progress_percent || 0}%</span>
                   </div>
-                  <progress value={row.progress_percent || 0} max="100" style={{ width: '100%' }} />
+                  <div className="balken"><span style={{ width: `${row.progress_percent || 0}%` }} /></div>
                 </div>
               ))
             ) : (
@@ -114,6 +115,7 @@ export default function StudentDashboard({ user }) {
           </div>
         </>
       )}
+      </div>
     </section>
   );
 }

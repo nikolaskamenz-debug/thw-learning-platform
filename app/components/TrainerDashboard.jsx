@@ -52,15 +52,16 @@ export default function TrainerDashboard({ user }) {
   if (!['Ausbilder', 'Admin'].includes(user?.profile?.role)) return null;
 
   return (
-    <section>
+    <section className="abschnitt">
+      <div className="karte">
       <h2>Trainer-Dashboard</h2>
       {error && <p role="alert">{error}</p>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
-        <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}><strong>Schüler</strong><p style={{ fontSize: 28, margin: '8px 0' }}>{stats.students}</p></article>
-        <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}><strong>Ø Fortschritt</strong><p style={{ fontSize: 28, margin: '8px 0' }}>{stats.average}%</p></article>
-        <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}><strong>Materialien</strong><p style={{ fontSize: 28, margin: '8px 0' }}>{stats.documents}</p></article>
-        <article style={{ border: '1px solid #ddd', borderRadius: 8, padding: 16 }}><strong>Offene Reviews</strong><p style={{ fontSize: 28, margin: '8px 0' }}>{stats.pending}</p></article>
+      <div className="kennzahlen">
+        <article className="kennzahl"><span className="kennzahl__titel">Schüler</span><p className="kennzahl__wert">{stats.students}</p></article>
+        <article className="kennzahl"><span className="kennzahl__titel">Ø Fortschritt</span><p className="kennzahl__wert">{stats.average}%</p></article>
+        <article className="kennzahl"><span className="kennzahl__titel">Materialien</span><p className="kennzahl__wert">{stats.documents}</p></article>
+        <article className="kennzahl"><span className="kennzahl__titel">Offene Prüfungen</span><p className="kennzahl__wert">{stats.pending}</p></article>
       </div>
 
       <h3 style={{ marginTop: 20 }}>Schülerübersicht</h3>
@@ -70,7 +71,7 @@ export default function TrainerDashboard({ user }) {
             const rows = progress.filter((row) => row.user_id === student.id);
             const avg = rows.length ? Math.round(rows.reduce((sum, row) => sum + (row.progress_percent || 0), 0) / rows.length) : 0;
             return (
-              <div key={student.id} style={{ border: '1px solid #eee', borderRadius: 8, padding: 12, display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+              <div key={student.id} className="kennzahl" style={{ display: 'flex', justifyContent: 'space-between', gap: 16, alignItems: 'center', padding: '14px 18px' }}>
                 <span>{student.name || student.email}</span>
                 <span>{avg}%</span>
               </div>
@@ -78,6 +79,7 @@ export default function TrainerDashboard({ user }) {
           })}
         </div>
       ) : <p>Noch keine Schüler vorhanden.</p>}
+      </div>
     </section>
   );
 }
