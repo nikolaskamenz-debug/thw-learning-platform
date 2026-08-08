@@ -14,47 +14,74 @@ export default function Home() {
   const [quizResult, setQuizResult] = useState(null);
   const [lastUpload, setLastUpload] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+
   const role = currentUser?.profile?.role;
   const isStudent = role === 'Schüler';
   const isTrainer = role === 'Ausbilder' || role === 'Admin';
   const isAdmin = role === 'Admin';
 
   return (
-    <main style={{ maxWidth: 1000, margin: '0 auto', padding: 24 }}>
-      <header style={{ marginBottom: 32 }}>
-        <h1>THW Learn AI</h1>
-        <p>Lernplattform für Ausbildung, Dokumente, Quiz und KI-gestütztes Lernen.</p>
+    <main className="seite">
+      <header className="kopfzeile">
+        <span className="wortmarke">
+          <b>THW</b> Learn AI
+        </span>
+        <span
+          style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 11.5,
+            letterSpacing: '.08em',
+            textTransform: 'uppercase',
+            color: 'var(--weiss-50)',
+          }}
+        >
+          {role ? `Angemeldet · ${role}` : 'In Entwicklung'}
+        </span>
       </header>
 
-      <div style={{ display: 'grid', gap: 24 }}>
-        <AuthPanel onUserChange={setCurrentUser} />
+      {!currentUser && (
+        <div className="abschnitt" style={{ maxWidth: 620 }}>
+          <h1>Lernen mit Beleg</h1>
+          <p style={{ marginTop: 12, fontSize: 16.5 }}>
+            Ausbildungsinhalte, Quizze und ein KI-Ausbilder, der seine Antworten
+            aus freigegebenen Originalunterlagen zieht.
+          </p>
+        </div>
+      )}
 
-        {currentUser ? (
-          <>
-            {isStudent && <StudentDashboard user={currentUser} />}
-            {isTrainer && <TrainerDashboard user={currentUser} />}
-            {isAdmin && <MaterialReview user={currentUser} />}
+      <AuthPanel onUserChange={setCurrentUser} />
 
-            {isStudent && (
-              <>
-                <ChatInterface />
-                <QuizComponent onComplete={setQuizResult} />
-                {quizResult && <p role="status">Letztes Quiz-Ergebnis: {quizResult.score} von {quizResult.total} richtig.</p>}
-                <ProgressTracker userId={currentUser.id} />
-              </>
-            )}
+      {currentUser ? (
+        <>
+          {isStudent && (
+            <>
+              <StudentDashboard user={currentUser} />
+              <ChatInterface />
+              <QuizComponent onComplete={setQuizResult} />
+              {quizResult && (
+                <p className="meldung meldung--ok" role="status">
+                  Letztes Quiz: {quizResult.score} von {quizResult.total} richtig.
+                </p>
+              )}
+              <ProgressTracker userId={currentUser.id} />
+            </>
+          )}
 
-            {isTrainer && (
-              <>
-                <UploadComponent onUploaded={setLastUpload} />
-                {lastUpload && <p role="status">Zuletzt hochgeladen: {lastUpload.fileName}</p>}
-              </>
-            )}
-          </>
-        ) : (
-          <p>Bitte anmelden oder registrieren, um die Lernplattform zu verwenden.</p>
-        )}
-      </div>
+          {isTrainer && (
+            <>
+              <TrainerDashboard user={currentUser} />
+              <UploadComponent onUploaded={setLastUpload} />
+              {lastUpload && (
+                <p className="meldung meldung--ok" role="status">
+                  Zuletzt hochgeladen: {lastUpload.document?.title || lastUpload.fileName}
+                </p>
+              )}
+            </>
+          )}
+
+          {isAdmin && <MaterialReview user={currentUser} />}
+        </>
+      ) : null}
     </main>
   );
 }
