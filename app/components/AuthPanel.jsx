@@ -30,6 +30,8 @@ export default function AuthPanel({ onUserChange }) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [gewuenschteRolle, setGewuenschteRolle] = useState('Schüler');
+  const [ortsverband, setOrtsverband] = useState('');
   const [neuesPasswort, setNeuesPasswort] = useState('');
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -52,7 +54,7 @@ export default function AuthPanel({ onUserChange }) {
     const supabase = getSupabaseBrowserClient();
     const { data, error } = await supabase
       .from('user_profiles')
-      .select('id,email,name,role')
+      .select('id,email,name,role,freigeschaltet,gewuenschte_rolle,ortsverband')
       .eq('id', aktuellerNutzer.id)
       .single();
 
@@ -120,7 +122,16 @@ export default function AuthPanel({ onUserChange }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { name } },
+      options: {
+        data: {
+          name,
+          // Ein Wunsch, keine Zusage: Die Rolle vergibt beim
+          // Freischalten ein Admin. Wer sich hier als Ausbilder
+          // einträgt, ist damit noch keiner.
+          gewuenschte_rolle: gewuenschteRolle,
+          ortsverband: ortsverband.trim(),
+        },
+      },
     });
 
     setLaeuft(false);
@@ -393,7 +404,8 @@ export default function AuthPanel({ onUserChange }) {
         <h2>Anmelden</h2>
         <p style={{ margin: '10px 0 20px', fontSize: 15 }}>
           Noch kein Konto? Trag dich mit denselben Feldern ein und wähle
-          „Registrieren". Neue Konten starten als Schüler.
+          „Registrieren". Neue Konten werden von Hand freigeschaltet — das
+          dauert ein bis zwei Tage.
         </p>
 
         <form onSubmit={anmelden}>
@@ -424,6 +436,36 @@ export default function AuthPanel({ onUserChange }) {
               autoComplete="email"
               required
             />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14 }}>
+            <div className="feld">
+              <label htmlFor="auth-rolle">
+                Ich bin <span className="freiwillig">(nur für die Registrierung)</span>
+              </label>
+              <select
+                id="auth-rolle"
+                value={gewuenschteRolle}
+                onChange={(e) => setGewuenschteRolle(e.target.value)}
+              >
+                <option value="Schüler">Helferin oder Helfer</option>
+                <option value="Ausbilder">Ausbilderin oder Ausbilder</option>
+              </select>
+            </div>
+
+            <div className="feld">
+              <label htmlFor="auth-ov">
+                Ortsverband <span className="freiwillig">(nur für die Registrierung)</span>
+              </label>
+              <input
+                id="auth-ov"
+                type="text"
+                value={ortsverband}
+                onChange={(e) => setOrtsverband(e.target.value)}
+                placeholder="z. B. Dülmen"
+                autoComplete="organization"
+              />
+            </div>
           </div>
 
           <div className="feld">

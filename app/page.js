@@ -11,16 +11,24 @@ import QuizEditor from './components/QuizEditor';
 import UploadComponent from './components/UploadComponent';
 import ProgressTracker from './components/ProgressTracker';
 import OffeneAntworten from './components/OffeneAntworten';
+import Benutzerfreigabe from './components/Benutzerfreigabe';
 
 export default function Home() {
   const [quizResult, setQuizResult] = useState(null);
   const [lastUpload, setLastUpload] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
 
-  const role = currentUser?.profile?.role;
-  const isStudent = role === 'Schüler';
-  const isTrainer = role === 'Ausbilder' || role === 'Admin';
-  const isAdmin = role === 'Admin';
+  const profil = currentUser?.profile;
+  const role = profil?.role;
+
+  /* Ein Konto ohne Freischaltung hat keine Rolle — auch wenn in der
+     Spalte etwas steht. Das ist keine Anzeigefrage: Die Datenbank
+     verweigert diesen Konten ohnehin jeden Zugriff. Die Oberfläche sagt
+     nur, warum. */
+  const freigeschaltet = profil?.freigeschaltet === true;
+  const isStudent = freigeschaltet && role === 'Schüler';
+  const isTrainer = freigeschaltet && (role === 'Ausbilder' || role === 'Admin');
+  const isAdmin = freigeschaltet && role === 'Admin';
 
   return (
     <main className="seite">
@@ -37,7 +45,11 @@ export default function Home() {
             color: 'var(--weiss-50)',
           }}
         >
-          {role ? `Angemeldet · ${role}` : 'In Entwicklung'}
+          {!currentUser
+            ? 'In Entwicklung'
+            : freigeschaltet
+              ? `Angemeldet · ${role}`
+              : 'Wartet auf Freischaltung'}
         </span>
       </header>
 
@@ -53,7 +65,31 @@ export default function Home() {
 
       <AuthPanel onUserChange={setCurrentUser} />
 
-      {currentUser ? (
+      {/* ---------- Wartet auf Freischaltung ---------- */}
+      {currentUser && !freigeschaltet && (
+        <section className="abschnitt">
+          <div className="karte karte--gelb" style={{ maxWidth: 560 }}>
+            <span className="ol">Zugang</span>
+            <h2>Dein Konto wartet</h2>
+            <p style={{ margin: '12px 0', fontSize: 15.5 }}>
+              Die Anmeldung hat geklappt — freigeschaltet bist du aber noch
+              nicht. Die Plattform läuft im geschlossenen Testbetrieb, deshalb
+              gibt ein Mensch jedes Konto einzeln frei.
+            </p>
+            <p style={{ margin: '0 0 12px', fontSize: 15.5 }}>
+              Das dauert in der Regel ein bis zwei Tage. Du bekommst keine
+              Benachrichtigung — schau einfach wieder vorbei und melde dich an.
+            </p>
+            <p style={{ fontSize: 14, color: 'var(--weiss-50)' }}>
+              Dauert es länger oder passt etwas nicht? Schreib an{' '}
+              <a href="mailto:info@thw-ai.de">info@thw-ai.de</a>.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ---------- Freigeschaltet ---------- */}
+      {currentUser && freigeschaltet && (
         <>
           {isStudent && <StudentDashboard user={currentUser} />}
 
@@ -71,13 +107,18 @@ export default function Home() {
             </>
           )}
 
-          {isAdmin && <MaterialReview user={currentUser} />}
+          {isAdmin && (
+            <>
+              <Benutzerfreigabe user={currentUser} />
+              <MaterialReview user={currentUser} />
+            </>
+          )}
 
           {/*
-            Chat und Quiz stehen allen Angemeldeten offen, nicht nur
-            Schuelern. Wer Fragen schreibt, muss sie selbst durchspielen
-            koennen — und der KI-Ausbilder ist fuer Ausbilder mindestens
-            so nuetzlich wie fuer die Truppe.
+            Chat und Quiz stehen allen Freigeschalteten offen, nicht nur
+            Schülern. Wer Fragen schreibt, muss sie selbst durchspielen
+            können — und der KI-Ausbilder ist für Ausbilder mindestens so
+            nützlich wie für die Truppe.
           */}
           <ChatInterface />
 
@@ -91,7 +132,7 @@ export default function Home() {
 
           {isStudent && <ProgressTracker userId={currentUser.id} />}
         </>
-      ) : null}
+      )}
     </main>
   );
 }
