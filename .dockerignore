@@ -1,0 +1,21 @@
+# Was nicht ins Image gehoert.
+#
+# .env.local steht bewusst NICHT hier: Next.js setzt die NEXT_PUBLIC_*
+# Werte beim Bauen fest in die Browser-Dateien ein. Ohne die Datei waere
+# die Anmeldung im Browser kaputt. Das Image enthaelt damit Zugangsdaten
+# — es darf deshalb nirgends hochgeladen werden.
+
+.git
+.gitignore
+node_modules
+.next
+npm-debug.log*
+
+# Sicherungskopien von Zugangsdaten haben im Image nichts zu suchen.
+# nano zaehlt durch: .save, .save.1, .save.2 — das Muster muss alle
+# erwischen.
+*.save
+*.save.*
+*.bak
+
+inbox
