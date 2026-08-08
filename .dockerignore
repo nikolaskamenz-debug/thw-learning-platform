@@ -11,9 +11,11 @@ node_modules
 .next
 npm-debug.log*
 
-# Sicherungskopien von Zugangsdaten haben im Image nichts zu suchen
-.env.local.save
-.env*.save
+# Sicherungskopien von Zugangsdaten haben im Image nichts zu suchen.
+# nano zaehlt durch: .save, .save.1, .save.2 — das Muster muss alle
+# erwischen.
+*.save
+*.save.*
 *.bak
 
 inbox
