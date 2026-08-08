@@ -21,11 +21,15 @@ import OpenAI from 'openai';
 const ERLAUBTE_TYPEN = [
   'application/pdf',
   'text/plain',
+  'text/markdown',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  // Praesentationen: OpenAI liest daraus nur den Text, keine Bilder
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 ];
 
-const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_BYTES = 100 * 1024 * 1024; // 100 MB — Praesentationen sind gross
 
 function fehler(nachricht, status) {
   return NextResponse.json({ error: nachricht }, { status });
@@ -99,11 +103,11 @@ export async function POST(req) {
   }
 
   if (datei.size > MAX_BYTES) {
-    return fehler('Die Datei ist größer als 25 MB.', 400);
+    return fehler('Die Datei ist größer als 100 MB.', 400);
   }
 
   if (datei.type && !ERLAUBTE_TYPEN.includes(datei.type)) {
-    return fehler('Erlaubt sind PDF, Word und Textdateien.', 400);
+    return fehler('Erlaubt sind PDF, Word, PowerPoint und Textdateien.', 400);
   }
 
   const titel = text(formData, 'title', 200);

@@ -34,7 +34,7 @@ export default function MaterialReview({ user }) {
     const supabase = getSupabaseBrowserClient();
     const { data, error } = await supabase
       .from('thw_documents')
-      .select('id,title,description,chapter,page_number,status,is_approved,review_feedback,reviewed_at,created_at,uploaded_by,openai_file_id')
+      .select('id,title,description,chapter,page_number,status,is_approved,review_feedback,reviewed_at,created_at,uploaded_by,openai_file_id,in_knowledge_base')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -84,27 +84,51 @@ export default function MaterialReview({ user }) {
     setMeldung('Prüfung wird gespeichert …');
     setArt('');
 
+    // Die Pruefung laeuft ueber den Server, nicht direkt in die
+    // Datenbank: Nur dort liegt der OpenAI-Schluessel, mit dem die
+    // Unterlage in die Wissensbasis eingehaengt wird. Ein Statuswechsel
+    // ohne diesen Schritt waere eine Freigabe, die der KI-Ausbilder nie
+    // zu sehen bekommt.
     const supabase = getSupabaseBrowserClient();
-    const { error } = await supabase
-      .from('thw_documents')
-      .update({
-        status: neuerStatus,
-        review_feedback: text || null,
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-      })
-      .eq('id', dokumentId);
+    const { data: sitzung } = await supabase.auth.getSession();
+    const token = sitzung?.session?.access_token;
 
-    setInArbeit(null);
-
-    if (error) {
-      setMeldung(error.message);
+    if (!token) {
+      setInArbeit(null);
+      setMeldung('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.');
       setArt('fehler');
       return;
     }
 
-    setMeldung(neuerStatus === 'approved' ? 'Unterlage freigegeben.' : 'Unterlage abgelehnt.');
-    setArt('ok');
+    let antwort;
+    let daten;
+    try {
+      antwort = await fetch('/api/documents/review', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: dokumentId, status: neuerStatus, feedback: text }),
+      });
+      daten = await antwort.json();
+    } catch {
+      setInArbeit(null);
+      setMeldung('Der Server war nicht erreichbar. Bitte versuche es erneut.');
+      setArt('fehler');
+      return;
+    }
+
+    setInArbeit(null);
+
+    if (!antwort.ok) {
+      setMeldung(daten?.error || 'Die Pruefung konnte nicht gespeichert werden.');
+      setArt('fehler');
+      return;
+    }
+
+    setMeldung(daten.warnung ? `${daten.message} ${daten.warnung}` : daten.message);
+    setArt(daten.warnung ? 'warnung' : 'ok');
     await laden();
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { getSupabaseBrowserClient } from '../lib/supabaseClient';
 
 export default function ChatInterface() {
   const [nachrichten, setNachrichten] = useState([]);
@@ -23,9 +24,20 @@ export default function ChatInterface() {
     setLaeuft(true);
 
     try {
+      const supabase = getSupabaseBrowserClient();
+      const { data: sitzung } = await supabase.auth.getSession();
+      const token = sitzung?.session?.access_token;
+
+      if (!token) {
+        throw new Error('Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.');
+      }
+
       const antwort = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ message: frage }),
       });
       const daten = await antwort.json();
@@ -49,9 +61,9 @@ export default function ChatInterface() {
         <span className="ol">KI-Ausbilder</span>
         <h2>Frag nach</h2>
         <p style={{ margin: '10px 0 18px', fontSize: 15 }}>
-          Stell deine Frage zur Ausbildung. Antworten sollen künftig Dokument,
-          Kapitel und Seite nennen — solange die Wissensbasis noch nicht
-          angebunden ist, antwortet der Assistent ohne Quellenangabe.
+          Stell deine Frage zur Ausbildung. Der Assistent sucht nur in
+          freigegebenen Unterlagen und nennt Dokument, Kapitel und Seite.
+          Findet er nichts, sagt er das — er rät nicht.
         </p>
 
         <div

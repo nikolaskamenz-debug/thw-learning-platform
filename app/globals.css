@@ -242,6 +242,9 @@ h3 { font-weight: 700; font-size: 17px; }
 }
 .meldung--ok { color: var(--gruen); font-weight: 600; }
 .meldung--fehler { color: var(--rot); font-weight: 600; }
+/* Vorgang gelaufen, aber mit Einschraenkung — etwa Freigabe gespeichert,
+   Wissensbasis nicht erreicht. Weder gruen noch rot waere ehrlich. */
+.meldung--warnung { color: var(--signal); font-weight: 600; }
 
 .marke {
   display: inline-flex;
