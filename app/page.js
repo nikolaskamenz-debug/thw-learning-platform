@@ -10,6 +10,7 @@ import QuizComponent from './components/QuizComponent';
 import QuizEditor from './components/QuizEditor';
 import UploadComponent from './components/UploadComponent';
 import ProgressTracker from './components/ProgressTracker';
+import OffeneAntworten from './components/OffeneAntworten';
 
 export default function Home() {
   const [quizResult, setQuizResult] = useState(null);
@@ -66,6 +67,7 @@ export default function Home() {
                 </p>
               )}
               <QuizEditor user={currentUser} />
+              <OffeneAntworten user={currentUser} />
             </>
           )}
 
