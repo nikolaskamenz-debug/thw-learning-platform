@@ -131,7 +131,7 @@ export async function POST(req) {
 
     if (kannWissensbasis && dokument.in_knowledge_base) {
       try {
-        await openai.beta.vectorStores.files.del(vectorStoreId, dokument.openai_file_id);
+        await openai.vectorStores.files.del(vectorStoreId, dokument.openai_file_id);
         ausWissensbasis = false;
       } catch (err) {
         // 404 heisst: liegt ohnehin nicht mehr drin. Alles andere ist ein
@@ -208,7 +208,7 @@ export async function POST(req) {
   }
 
   try {
-    await openai.beta.vectorStores.files.create(vectorStoreId, {
+    await openai.vectorStores.files.create(vectorStoreId, {
       file_id: dokument.openai_file_id,
     });
   } catch (err) {
