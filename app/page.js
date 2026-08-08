@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import AuthPanel from './components/AuthPanel';
+import StudentDashboard from './components/StudentDashboard';
 import ChatInterface from './components/ChatInterface';
 import QuizComponent from './components/QuizComponent';
 import UploadComponent from './components/UploadComponent';
@@ -24,6 +25,8 @@ export default function Home() {
 
         {currentUser ? (
           <>
+            <StudentDashboard user={currentUser} />
+
             <ChatInterface />
 
             <QuizComponent onComplete={setQuizResult} />
@@ -33,9 +36,13 @@ export default function Home() {
               </p>
             )}
 
-            <UploadComponent onUploaded={setLastUpload} />
-            {lastUpload && (
-              <p role="status">Zuletzt hochgeladen: {lastUpload.fileName}</p>
+            {(currentUser.profile?.role === 'Ausbilder' || currentUser.profile?.role === 'Admin') && (
+              <>
+                <UploadComponent onUploaded={setLastUpload} />
+                {lastUpload && (
+                  <p role="status">Zuletzt hochgeladen: {lastUpload.fileName}</p>
+                )}
+              </>
             )}
 
             <ProgressTracker userId={currentUser.id} />
