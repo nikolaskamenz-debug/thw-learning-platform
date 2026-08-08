@@ -5,3 +5,10 @@ node_modules/
 .env.*.local
 .DS_Store
 .env.local.save
+
+# Sicherungskopien von Zugangsdaten. nano legt beim Abbruch .save,
+# .save.1, .save.2 an — das Muster muss alle erwischen, nicht nur die
+# erste. Eine solche Datei ist schon einmal in einen Commit gerutscht.
+.env*
+*.save
+*.save.*
