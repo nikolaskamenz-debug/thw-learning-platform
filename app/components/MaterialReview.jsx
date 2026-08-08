@@ -66,6 +66,8 @@ export default function MaterialReview({ user }) {
       pending: dokumente.filter((d) => d.status === 'pending').length,
       approved: dokumente.filter((d) => d.status === 'approved').length,
       rejected: dokumente.filter((d) => d.status === 'rejected').length,
+      // Freigegeben, aber nicht in der Wissensbasis — sollte 0 sein.
+      haengt: dokumente.filter((d) => d.status === 'approved' && !d.in_knowledge_base).length,
       alle: dokumente.length,
     }),
     [dokumente],
@@ -140,9 +142,19 @@ export default function MaterialReview({ user }) {
         <span className="ol">Admin</span>
         <h2>Material prüfen</h2>
         <p style={{ marginBottom: 18, fontSize: 15 }}>
-          Nur freigegebene Unterlagen werden Schülern angezeigt und später als
-          Wissensquelle des KI-Tutors verwendet.
+          Freigegebene Unterlagen gehen sofort in die Wissensbasis des
+          KI-Ausbilders — er zitiert ausschließlich daraus. Was hier
+          abgelehnt wird, wird wieder herausgenommen.
         </p>
+
+        {anzahl.haengt > 0 && (
+          <p className="meldung meldung--warnung" style={{ marginBottom: 18 }}>
+            {anzahl.haengt === 1
+              ? "Eine freigegebene Unterlage ist nicht in der Wissensbasis angekommen."
+              : `${anzahl.haengt} freigegebene Unterlagen sind nicht in der Wissensbasis angekommen.`}{" "}
+            Der KI-Ausbilder kann sie nicht zitieren. Bitte noch einmal freigeben.
+          </p>
+        )}
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
           {FILTER.map((f) => (
@@ -198,6 +210,23 @@ export default function MaterialReview({ user }) {
                   {dok.openai_file_id ? ' · Datei übertragen' : ' · keine Datei hinterlegt'}
                   {dok.reviewed_at ? ` · zuletzt geprüft ${new Date(dok.reviewed_at).toLocaleDateString('de-DE')}` : ''}
                 </p>
+
+                {/* Freigegeben heißt nicht automatisch, dass der KI-Ausbilder
+                    die Unterlage kennt. Weicht beides voneinander ab, muss
+                    man es sehen — sonst wartet jemand vergeblich darauf,
+                    dass sie zitiert wird. */}
+                {dok.status === 'approved' && !dok.in_knowledge_base && (
+                  <p className="meldung meldung--warnung" style={{ fontSize: 13.5, margin: '0 0 12px' }}>
+                    Freigegeben, aber nicht in der Wissensbasis. Der KI-Ausbilder
+                    kann diese Unterlage nicht zitieren — bitte noch einmal freigeben.
+                  </p>
+                )}
+
+                {dok.status === 'approved' && dok.in_knowledge_base && (
+                  <p style={{ fontFamily: 'var(--mono)', fontSize: 11.5, color: 'var(--gruen)', margin: '0 0 12px' }}>
+                    In der Wissensbasis
+                  </p>
+                )}
 
                 <div className="feld" style={{ marginBottom: 12 }}>
                   <label htmlFor={`fb-${dok.id}`}>Rückmeldung an den Ausbilder</label>
