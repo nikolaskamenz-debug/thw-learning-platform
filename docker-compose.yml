@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  thw-app:
+    build: .
+    container_name: thw-learning-platform
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=https://platform.thw-ai.de
+    volumes:
+      - .env.local:/app/.env.local:ro
+    restart: unless-stopped
