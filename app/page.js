@@ -7,6 +7,7 @@ import TrainerDashboard from './components/TrainerDashboard';
 import MaterialReview from './components/MaterialReview';
 import ChatInterface from './components/ChatInterface';
 import QuizComponent from './components/QuizComponent';
+import QuizEditor from './components/QuizEditor';
 import UploadComponent from './components/UploadComponent';
 import ProgressTracker from './components/ProgressTracker';
 
@@ -53,19 +54,7 @@ export default function Home() {
 
       {currentUser ? (
         <>
-          {isStudent && (
-            <>
-              <StudentDashboard user={currentUser} />
-              <ChatInterface />
-              <QuizComponent onComplete={setQuizResult} />
-              {quizResult && (
-                <p className="meldung meldung--ok" role="status">
-                  Letztes Quiz: {quizResult.score} von {quizResult.total} richtig.
-                </p>
-              )}
-              <ProgressTracker userId={currentUser.id} />
-            </>
-          )}
+          {isStudent && <StudentDashboard user={currentUser} />}
 
           {isTrainer && (
             <>
@@ -76,10 +65,29 @@ export default function Home() {
                   Zuletzt hochgeladen: {lastUpload.document?.title || lastUpload.fileName}
                 </p>
               )}
+              <QuizEditor user={currentUser} />
             </>
           )}
 
           {isAdmin && <MaterialReview user={currentUser} />}
+
+          {/*
+            Chat und Quiz stehen allen Angemeldeten offen, nicht nur
+            Schuelern. Wer Fragen schreibt, muss sie selbst durchspielen
+            koennen — und der KI-Ausbilder ist fuer Ausbilder mindestens
+            so nuetzlich wie fuer die Truppe.
+          */}
+          <ChatInterface />
+
+          <QuizComponent onComplete={setQuizResult} />
+          {quizResult && (
+            <p className="meldung meldung--ok" role="status">
+              Zuletzt: {quizResult.score} von {quizResult.total} Punkten
+              {quizResult.offen ? ` · ${quizResult.offen} noch zu beurteilen` : ''}.
+            </p>
+          )}
+
+          {isStudent && <ProgressTracker userId={currentUser.id} />}
         </>
       ) : null}
     </main>
